@@ -10,7 +10,7 @@ Does not persist anything, which implies only works reasonably on small wikis - 
 # Dependencies
 
 - pywikibot, which is doing most of the heavy lifting, 
-- networkx, making 
+- networkx, which makes it easier to select links we _can_ check sooner rather than later
 
 
 # Setup
@@ -21,5 +21,4 @@ See https://www.mediawiki.org/wiki/Manual:Pywikibot/user-config.py
 
 
 # TODO: 
-- considering removing the need for networkx
 - considering removing the threading, it's probably not worth the complexity
