@@ -3,7 +3,8 @@
 Checks whether internal mediawiki links with an #anchor match a header in the target page. Also reports duplicate sections, because that was easy.
 
 Does not persist anything, which implies only works reasonably on small wikis - it checks my ~1000-page wiki in a minute, which is more that good enough for me.
-...but you don't want to run this on wikipedia without a lot more work to, say, not refetch six million pages every run.
+
+...but you don't want to run this on wikipedia without a lot more additional work to, say, not refetch six million pages every run.
 
 
 # Dependencies
