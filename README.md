@@ -14,7 +14,7 @@ Does not persist anything, which implies only works reasonably on small wikis - 
 
 # Setup
 
-Understand pywikibot's user-config.py well enough
+Understand pywikibot's user-config.py well enough to tell it about your wiki.
 
 See https://www.mediawiki.org/wiki/Manual:Pywikibot/user-config.py
 
