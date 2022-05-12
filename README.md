@@ -21,4 +21,4 @@ See https://www.mediawiki.org/wiki/Manual:Pywikibot/user-config.py
 
 
 # TODO: 
-- considering removing the threading, it's probably not worth the complexity
+- consider removing the threading, it's probably not worth the complexity
