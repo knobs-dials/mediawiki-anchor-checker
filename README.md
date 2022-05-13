@@ -27,3 +27,4 @@ See e.g. https://www.mediawiki.org/wiki/Manual:Pywikibot/user-config.py and http
 - discover page names as we go (right now we hope that prefix search for [a-z0-9] gets most things)
 - consider removing the threading, it's probably not worth the complexity. This is one example where concurrency is good enough and you don't really need parallelism
 - check that redirect pages are getting checked
+- follow mediawiki behaviour more directly, e.g. the fact that it allows to have spaces in the anchor even though they argably should be underscores
