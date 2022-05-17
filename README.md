@@ -33,7 +33,7 @@ For some more explanation, see e.g. https://www.mediawiki.org/wiki/Manual:Pywiki
 
 
 # TODO: 
-- figure out how to deal with redirects
+- include checks of redirects, in a sensibly-reported way
 - follow mediawiki behaviour more directly, e.g. the fact that in practice allows to have spaces in the anchor even though they argably should be underscores
 
 CONSIDER
