@@ -4,6 +4,8 @@ Checks whether internal links within a mediawiki wiki will work as expected:
 - checks whether internal mediawiki links with an #anchor match a header in the target page
 - checks duplicate section names
 
+First version.
+
 <br/>
 Does not persist anything, which implies it is only reasonably to run on small wikis. 
 It checks my ~1000-page wiki in a minute, which is more that good enough for me.
