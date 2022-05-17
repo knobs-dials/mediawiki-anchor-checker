@@ -1,0 +1,219 @@
+#!/usr/bin/python3
+#
+# The first "is this worth doing" version of this was "fetch each page, fetch list of pages that link to us, fetch links from them, and check"
+#  which was simple and reports as it runs, but is also a fairly O(n^2) solution.
+#
+# 
+# It would be nice to check links as soon as we can, 
+#  but this is more involved because any page we fetch can be the source and the origin of broken links,
+#  so we should 
+#  - do checks when they become possible
+#  - avoid doubles
+# 
+# We can build a graph of pages we know ''exist'', 
+# and check links once both ends of an edge become ''parsed''
+# ...and probably remove the edges we have checked
+# 
+# Currently it's still not the most efficient, in that the 'select subgraph of things were both sides are parsed' is repeated a bunch.
+# 
+# 
+# We have the extra footnote that networkx isn't thread-safe.
+# 
+
+import re
+
+import pywikibot
+from pywikibot import textlib, pagegenerators
+
+
+# Help support "did you mean this section name?" -- half the point of this was fixing anchor links we break by renaming sections
+def ngram_count(s, gramlens=(2,3,4)):
+    ''' Takes a string, figures out the n-grams, 
+        Returns a dict from n-gram strings to how often they occur in this string.
+    '''
+    count={}
+    for n in gramlens:
+        if len(s) < n:
+            continue
+        for i in range(len(s)-(n-1)):
+            tg = s[i:i+n]
+            if tg not in count:
+                count[tg]=1
+            else:
+                count[tg]+=1
+    return count
+
+def ngram_sort_by_matches(s, options,  gramlens=(1,2,3,4)):
+    ''' sort items in string-list l by how well they match string s, based on n-grams '''
+    sc = ngram_count(s)
+    options_with_score = []
+    for e in options:
+        score = 0
+        ec = ngram_count(e)
+        for ecs in ec:
+            if ecs in sc:
+                if len(ecs)==1: # tiny weight in comparison. Only really does anything when nothing longer matches, which is the point.
+                    score += 1
+                else:
+                    score += len(ecs)*sc[ecs]*ec[ecs]
+        options_with_score.append( (e, score) )
+    options_with_score.sort(key=lambda x: x[1], reverse=True)
+    return list(e[0]   for e in options_with_score)
+
+
+
+def anchor_encode(s):
+    ''' Section ancor encoding seems to be 
+        percent-encoded UTF-8, 
+        % become .
+        spaces become underscore
+        : stays :    (instead of becoming .3A)
+
+        TODO: Improve. This is not correct yet, it only does _most_ things right
+    '''
+    ret = []
+    s = re.sub('[<][^>]+[>]','', s) # ewww
+
+    for ch in s:
+        if ch==':':
+            ret.append(':')
+        elif ch==' ':
+            ret.append('_')
+        elif ch=='%':
+            ret.append('.')
+        elif ord(ch)>0x80 or ch in '!@#$^&*(){}[]<>|\\:;"\'/?_+,  ': # note: literal . is kept, and specifically not in there
+            for by in ch.encode('utf8'):
+                ret.append( '.%02X'%by )
+        else:
+            ret.append(ch)
+    return ''.join(ret)
+
+
+def get_page_sections(page):
+    ''' Extract section names on current page.
+        Returns a dict, from name to anchor-encoded name
+    '''
+    ret = {}
+    # It seems that, contrary to the documentation, the extract_sections generator will yield items that are either  a str, or a list of _Sections, so some patchup here
+    sections = textlib.extract_sections(page.text, thewiki)
+    for item in sections:
+        if type(item) is str:
+            continue
+        else:
+            for sect in item:
+                if type( sect ) is pywikibot.textlib._Section:
+                    sectitle = sect.title
+                    sectitle = sectitle.strip('= ') # hope that's good enough. Not sure pywikibot really cares about content parsing enough to help us? VERIFY
+
+                if sectitle not in ret:
+                    ret[sectitle] = anchor_encode(sectitle)
+                else:
+                    print("WARNING: Duplicate section title %r in page %r "%(sectitle, page.title()))
+
+    return ret.items()
+
+
+def get_page_links(page):
+    ''' Extract links on the page '''
+    ret = []
+    for link in pywikibot.link_regex.finditer( page.text ):
+        ret.append( link.group('title') )
+    return ret
+
+
+if __name__ == '__main__':
+    # these imports not technically needed for the above
+    import threading, time
+    import networkx
+
+    verbose = False
+
+    thewiki = pywikibot.Site('placeholder:xx')
+
+    fetch_done = False
+    gr = networkx.DiGraph()
+    nx_lock = threading.Lock()
+
+    count_parsed_pages = count_added_links = 0
+
+    def bg_fetch_thread():
+        ' fetches from wiki, puts relevant information in the graph '
+        global fetch_done, count_parsed_pages, count_added_links
+        print( "Fetching most page titles")
+        for letter in 'abcdefghijklmnopqrstuvwxyz0123456789': # TODO: figure out a better 'fetch all/most'
+            pp = pagegenerators.PrefixingPageGenerator(prefix=letter, site=thewiki, includeredirects=False)   # TODO: do (link extraction seems different)
+            pp = list(pp)
+            #if verbose:
+            print("# Added %d pages for %r"%(len(pp),letter))
+            for page in pp:
+                page_title    = page.title()
+                page_sections = list(get_page_sections(page))
+                page_links    = get_page_links(page)
+                # we may also discover new page names - TODO: make pp a queue so we can add to it
+
+                with nx_lock:
+                    gr.add_node(page_title,   escaped_secnames=list( esc   for _,esc in page_sections),   parsed=True)
+
+                for link_text in page_links:
+                    if '#' in link_text and link_text[0]!='#': # TODO: check within-page anchor references
+                        link_page_title, link_anchor = link_text.split('#',1) # should only ever be one anyway
+                        #print( "ADD_LINK %r -> %r with anchor #%r"%( page_title, link_page_title, link_anchor ) )
+                        with nx_lock:
+                            gr.add_edge( page_title, link_page_title, 
+                                           link_anchor=link_anchor )
+                        count_added_links += 1
+                count_parsed_pages += 1
+
+            if verbose:
+                print("# Total   parsed pages:%d   anchored links seen:%d"%(count_parsed_pages, count_added_links) )
+            
+        print( "fetch done" )
+        fetch_done = True
+
+    fetch_thread = threading.Thread(target=bg_fetch_thread)
+    fetch_thread.daemon = True
+    fetch_thread.start()
+
+    start_time = time.time()
+    while True:
+        # There is not enough locking - but TODO: remove the need
+        
+        if verbose:
+            print( "Finding links between already-parsed pages")
+        parsed_subgraph = networkx.subgraph_view(gr, filter_node=lambda n:gr.nodes[n].get('parsed',False))
+        #if verbose:
+        #    print( "  subgraph size:%d of %d"%(parsed_subgraph.size(), gr.size()))
+
+        with nx_lock:
+            edge_list = list(parsed_subgraph.edges)
+        #print("# links: ", len(edge_list))
+
+        for uv in edge_list:
+            from_title, to_title = uv
+            edge_dict = gr.edges[uv] 
+            link_anchor = edge_dict['link_anchor']
+
+            tonode_escaped_secnames = gr.nodes[to_title]['escaped_secnames']
+            
+            if link_anchor not in tonode_escaped_secnames:
+                section_name_matches = ngram_sort_by_matches(link_anchor, tonode_escaped_secnames)
+                if len(section_name_matches)==0:
+                    match_s = ' Target page has no sections.'
+                else:
+                    match_s = ' Closest seems to be %r'%section_name_matches[0]
+                    
+                # CONSIDER: guess closest matching string
+                print( "WARNING: Page %r refers to non-existing anchor %r in page %r.  %s"%(  from_title, link_anchor, to_title,  match_s  ) )
+
+            with nx_lock:
+                gr.remove_edge(from_title, to_title)
+
+        if fetch_done and len(edge_list)==0: # TODO: and explicit edges-based check, otherwise we _will_ forget what was not done at this point
+            print( "We seem to be done, after %d pages and %d links"%(count_parsed_pages, count_added_links) )
+            break
+
+        time.sleep(1)
+
+
+    print( "Done in %d seconds"%(time.time() - start_time) )
+    
