@@ -19,9 +19,10 @@ You'ld want a lot more work to, say, avoid unconditionally refetching six millio
 
 # Setup
 
-Understand pywikibot's user-config.py well enough to tell it about your wiki.
+Understand pywikibot's user-config.py well enough to tell it about your wiki. 
 
 See e.g. https://www.mediawiki.org/wiki/Manual:Pywikibot/user-config.py and https://www.mediawiki.org/wiki/Manual:Pywikibot/Use_on_third-party_wikis
+
 
 # TODO: 
 - figure out how to deal with redirects
