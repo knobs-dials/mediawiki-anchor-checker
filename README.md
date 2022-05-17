@@ -7,8 +7,8 @@ Checks whether internal links will work as expected:
 Does not persist anything, which implies it is only reasonably to run on small wikis. 
 It checks my ~1000-page wiki in a minute, which is more that good enough for me.
 
-...but you don't want to run this on wikipedia without a lot more additional work to, say,
-avoid unconditionally refetching six million pages every run.
+...but you DON'T want to run this on wikipedia in its current form.
+You'ld want a lot more work to, say, avoid unconditionally refetching six million pages every run.
 
 
 # Dependencies
