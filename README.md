@@ -35,6 +35,7 @@ For some more explanation, see e.g. https://www.mediawiki.org/wiki/Manual:Pywiki
 # TODO: 
 - include checks of redirects, in a sensibly-reported way
 - follow mediawiki behaviour more directly, e.g. the fact that in practice allows to have spaces in the anchor even though they argably should be underscores
+- add command line parameters
 
 CONSIDER
 - discover page names as we go (right now we hope that prefix search for [a-z0-9] gets most things)
