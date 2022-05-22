@@ -4,7 +4,7 @@ Checks whether internal links within a mediawiki wiki will work as expected:
 - checks whether internal mediawiki links with an #anchor match a header in the target page
 - checks duplicate section names
 
-First version.
+First version, doesn't do everyting I want yet.
 
 <br/>
 Does not persist anything, which implies it is only reasonably to run on small wikis. 
@@ -33,7 +33,7 @@ For some more explanation, see e.g. https://www.mediawiki.org/wiki/Manual:Pywiki
 
 
 # TODO: 
-- include checks of redirects, in a sensibly-reported way
+- include checks of redirects, in a sensibly-reported way. Including broken redirects.
 - follow mediawiki behaviour more directly, e.g. the fact that in practice allows to have spaces in the anchor even though they argably should be underscores
 - add command line parameters
 
