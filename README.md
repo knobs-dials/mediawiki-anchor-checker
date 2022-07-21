@@ -8,9 +8,9 @@ First version, doesn't do everyting I want yet.
 
 <br/>
 Does not persist anything, which implies it is only reasonably to run on small wikis. 
-It checks my ~1000-page wiki in a minute, which is more that good enough for me.
 
-...but you DON'T want to run this on wikipedia in its current form.
+It checks my ~1000-page wiki in a minute, which is more than good enough for me.
+...but you really DON'T want to run this against wikipedia.
 You'ld want a lot more work to, say, avoid unconditionally refetching six million pages every run.
 
 
