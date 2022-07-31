@@ -34,6 +34,7 @@ For some more explanation, see e.g. https://www.mediawiki.org/wiki/Manual:Pywiki
 
 # TODO: 
 - stop complaining about non-encoded anchors - mediawiki functins fine with those
+- same for redirects, because both name and anchor can vary
 - include checks of redirects, in a sensibly-reported way. Including broken redirects.
 - add command line parameters
 
