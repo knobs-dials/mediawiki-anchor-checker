@@ -33,8 +33,8 @@ For some more explanation, see e.g. https://www.mediawiki.org/wiki/Manual:Pywiki
 
 
 # TODO: 
+- stop complaining about non-encoded anchors - mediawiki functins fine with those
 - include checks of redirects, in a sensibly-reported way. Including broken redirects.
-- follow mediawiki behaviour more directly, e.g. the fact that in practice allows to have spaces in the anchor even though they argably should be underscores
 - add command line parameters
 
 CONSIDER
