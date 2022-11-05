@@ -1,6 +1,6 @@
 # mediawiki-anchor-checker
 
-Checks whether internal links within a mediawiki wiki will work as expected:
+This serves a very specific purpose: checking whether links between pages within a mediawiki wiki will work as expected:
 - checks whether internal mediawiki links with an #anchor match a header in the target page
 - checks duplicate section names
 
