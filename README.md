@@ -7,12 +7,15 @@ This serves a very specific purpose: checking whether links between pages within
 First version, doesn't do everyting I want yet.
 
 <br/>
-Does not persist anything, which implies it is only reasonably to run on small wikis. 
+Does not persist anything, which implies it is only reasonable to run on small wikis. 
 
 It checks my ~1000-page wiki in a minute, which is more than good enough for me.
 ...but you really DON'T want to run this against wikipedia.
-You'ld want a lot more work to, say, avoid unconditionally refetching six million pages every run.
+You'ld want a lot more work to, say, not fetch six million pages every run.
 
+# TODO:
+- more link normalization - based on what mediawiki actually does for you (it's not documented, bleh) because right now it mentions some links that do actually work as broken
+- consider anchors in the wiki text to be targets too
 
 # Dependencies
 - pywikibot, which is doing most of the heavy lifting, 
